@@ -35,7 +35,7 @@ from selenium.webdriver.support import expected_conditions as EC
 DEFAULT_URLS: List[str] = [
     "https://www.youtube.com/watch?v=nw0tZFyExtY&list=RDnw0tZFyExtY&start_radio=1",
 ]
-DEFAULT_SELECTOR: str = "title"
+DEFAULT_SELECTOR: str = "h1"
 DEFAULT_EXPECTED_TEXT: str = "fitterkarma - Pag-Ibig ay Kanibalismo II (OFFICIAL MUKBANG VIDEO)"
 DEFAULT_TIMEOUT_MS: int = 15000
 DEFAULT_OUT_DIR: str = "screenshots"
