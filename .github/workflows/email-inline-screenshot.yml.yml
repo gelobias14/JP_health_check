@@ -43,7 +43,7 @@ jobs:
 
       - name: Run UI Health Check Script
         run: |
-          python script.py \
+          python send_test_email_with_screenshot.py \
             --email-to "$EMAIL_TO" \
             --email-attach-screens \
             --email-inline-images
