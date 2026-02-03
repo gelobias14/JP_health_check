@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import os
 import sys
+import time
 import argparse
 import html
 import mimetypes
@@ -111,7 +112,7 @@ def validate_ui(
 ):
     print(f"\n--- Visiting: {url} ---")
     driver.get(url)
-
+    time.sleep(10) #wait time for accurate result
     wait = WebDriverWait(driver, timeout_ms / 1000.0)
     element = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, selector)))
 
