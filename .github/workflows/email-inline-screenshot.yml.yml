@@ -1,53 +1,59 @@
-name: Python application
+name: UI Health Check
 
 on:
-  # Auto-run on pushes to main (adjust as needed)
-  push:
-    branches:
-      - main
-    # Optional: limit to file changes
-    # paths:
-    #   - 'send_test_email_with_screenshot.py'
-    #   - '.github/workflows/gmail_smtp_inline_screenshot.yml'
+  workflow_dispatch:
+  schedule:
+    - cron: "30 22 * * *"  # 06:30 HKT -> 22:30 UTC previous day
 
 jobs:
-  send-email:
+  run-checks:
     runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
 
-      - name: Show workspace files
-        run: |
-          pwd
-          ls -la
+    env:
+      SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+      SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+
+      # You can pass additional config here
+      EMAIL_TO: ${{ secrets.EMAIL_TO}}
+      WINDOW: "1366x768"
+
+    steps:
+      - name: Checkout
+      - uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: "3.11"
 
-      - name: Install dependencies (Playwright + dotenv)
+      - name: Install Google Chrome
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget gnupg
+          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor -o /usr/share/keyrings/google-linux-signing-keyring.gpg
+          echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-linux-signing-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | \
+            sudo tee /etc/apt/sources.list.d/google-chrome.list
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+          google-chrome --version
+
+      - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install playwright python-dotenv
-          python -m playwright install --with-deps chromium
+          pip install selenium
 
-      # No inputs anymore — just set defaults directly
-      - name: Set default parameters
+      - name: Run UI health check (headless)
         run: |
-          echo "SCREENSHOT_URL=https://docs.newrelic.com/docs/apis/nerdgraph/examples/nerdgraph-cloud-integrations-api-tutorial/#list-enabled-provider-accounts" >> $GITHUB_ENV
-          echo "SUBJECT=Test Subject" >> $GITHUB_ENV
-          echo "BODY=Test Body" >> $GITHUB_ENV
+          python script.py \
+            --window "${WINDOW}" \
+            --email-to "${EMAIL_TO}" \
+            --email-attach-screens \
+            --no-email-inline-images
 
-      - name: Run email with inline screenshot
-        env:
-          SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
-          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-          TO_EMAIL: ${{ secrets.TO_EMAIL }}
-          SCREENSHOT_URL: ${{ env.SCREENSHOT_URL }}
-          SUBJECT: ${{ env.SUBJECT }}
-          BODY: ${{ env.BODY }}
-          USE_SSL_465: "false"
-        run: |
-          python send_test_email_with_screenshot.py
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots-${{ github.run_number }}
+          path: screenshots/
+          if-no-files-found: ignore
