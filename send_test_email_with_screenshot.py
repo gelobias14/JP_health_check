@@ -311,7 +311,7 @@ def build_email_html_and_inline_map(
               <td style="white-space:nowrap;">{url_escaped}</td>
               <td style="color:{status_color}; font-weight:bold; text-align:center;">{status_text}</td>
               <td>{safe_msg}</td>
-              <td>{shot_cell}</td>
+              <td><img style="width: 33%; height: 33%;" src="{shot_cell}"></td>
             </tr>
             """
         )
