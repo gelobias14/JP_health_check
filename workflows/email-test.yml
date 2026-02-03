@@ -28,3 +28,4 @@ jobs:
           name: smtp-logs
           path: smtp_console.log
           if-no-files-found: warn
+          
