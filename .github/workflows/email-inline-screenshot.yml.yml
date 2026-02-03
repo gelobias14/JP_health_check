@@ -1,25 +1,22 @@
-name: UI Health Check
+name: UI Health Check Email Report
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: "30 22 * * *"  # 06:30 HKT -> 22:30 UTC previous day
+    - cron: "30 22 * * *"   # 06:30 HKT daily
 
 jobs:
-  run-checks:
+  ui-check:
     runs-on: ubuntu-latest
 
     env:
       SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
       SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
-
-      # You can pass additional config here
-      EMAIL_TO: ${{ secrets.EMAIL_TO}}
-      WINDOW: "1366x768"
+      EMAIL_TO: ${{ secrets.TO_EMAIL }}
 
     steps:
-      - name: Checkout
-      - uses: actions/checkout@v4
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -30,25 +27,26 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y wget gnupg
-          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor -o /usr/share/keyrings/google-linux-signing-keyring.gpg
-          echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-linux-signing-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | \
-            sudo tee /etc/apt/sources.list.d/google-chrome.list
+          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub \
+            | sudo gpg --dearmor -o /usr/share/keyrings/google-linux-signing-keyring.gpg
+          echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-linux-signing-keyring.gpg] \
+            http://dl.google.com/linux/chrome/deb/ stable main" \
+            | sudo tee /etc/apt/sources.list.d/google-chrome.list
           sudo apt-get update
           sudo apt-get install -y google-chrome-stable
           google-chrome --version
 
-      - name: Install Python dependencies
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install selenium
 
-      - name: Run UI health check (headless)
+      - name: Run UI Health Check Script
         run: |
           python script.py \
-            --window "${WINDOW}" \
-            --email-to "${EMAIL_TO}" \
+            --email-to "$EMAIL_TO" \
             --email-attach-screens \
-            --no-email-inline-images
+            --email-inline-images
 
       - name: Upload screenshots
         if: always()
