@@ -33,10 +33,10 @@ from selenium.webdriver.support import expected_conditions as EC
 # ---------------- Defaults ---------------- #
 
 DEFAULT_URLS: List[str] = [
-    "https://docs.newrelic.com/docs/apis/nerdgraph/examples/nerdgraph-cloud-integrations-api-tutorial/#list-enabled-provider-accounts",
+    "https://azlappjisdcd25.mfcgd.com:10042/wps/portal/agentweb", "https://azlappjisdcd26.mfcgd.com:10062/wps/portal/agentweb",
 ]
-DEFAULT_SELECTOR: str = "h1"
-DEFAULT_EXPECTED_TEXT: str = "NerdGraph tutorial: Configure cloud integrations"
+DEFAULT_SELECTOR: str = "span"
+DEFAULT_EXPECTED_TEXT: str = "Manulink"
 DEFAULT_TIMEOUT_MS: int = 15000
 DEFAULT_OUT_DIR: str = "screenshots"
 DEFAULT_WINDOW: str = "1366x768"
